@@ -1,108 +1,130 @@
-# Chapter 01 - Introduction to Prolog
+# Chapter 1: Introduction to Prolog
 
-## 1.1 Defining relations by facts
+This chapter introduces the fundamental concepts of Prolog, a language for symbolic and non-numeric computation. We will explore how to define relationships using facts and rules.
 
-**Prolog** is a programming language for symbolic, non-numeric computation.
+**Associated Lab File:** [labs/lab01/lab01.pl](../labs/lab01/lab01.pl)
 
-if we want to say that `Tom` is a parent for `Bob` we write:
+---
+
+## Key Concepts
+
+### 1. Defining Relations with Facts
+
+In Prolog, we can define relationships between objects as **facts**. For example, to state that Tom is a parent of Bob, we write:
 
 ```prolog
-parent(tom, bob)
+parent(tom, bob).
 ```
 
-When this program has been communicated to the Prolog system, Prolog can
-be posed some questions about the parent relation. For example: Is Bob a parent
-of Pat? This question can be communicated to the Prolog system by typing:
+This establishes a `parent` relationship. We can then query the Prolog system to get information about this relationship.
+
+#### Asking Questions (Queries)
+
+- **Is Bob a parent of Pat?**
+
+  ```prolog
+  ?- parent(bob, pat).
+  ```
+
+- **Who is Liz's parent?**
+
+  ```prolog
+  ?- parent(X, liz).
+  ```
+
+- **Who are Bob's children?**
+
+  ```prolog
+  ?- parent(bob, X).
+  ```
+
+Prolog answers these questions by trying to satisfy the **goals** provided.
+
+### 2. Complex Queries
+
+We can ask more complex questions by combining goals.
+
+- **Who is a grandparent of Jim?**
+  This requires finding a person `Y` who is a parent of Jim, and then finding a person `X` who is a parent of `Y`.
+
+  ![Grandparent Relation](../diagrams/grandparent-grandchild-relations.svg)
+
+  ```prolog
+  ?- parent(Y, jim), parent(X, Y).
+  ```
+
+- **Do Ann and Pat have a common parent?**
+
+  ```prolog
+  ?- parent(X, ann), parent(X, pat).
+  ```
+
+### 3. Defining Relations with Rules
+
+We can also define new relationships using **rules**. A rule is a general statement about objects and their relationships.
+
+For example, we can define a `mother` relation based on the existing `parent` and `female` relations.
+
+**Logical Statement:**
+For all X and Y, X is the mother of Y if X is a parent of Y and X is female.
+
+**Prolog Rule:**
 
 ```prolog
-?- parent(bob,pat) -> yes
+mother(X, Y) :-
+    parent(X, Y),
+    female(X).
 ```
 
-More interesting questions can also be asked. For example: Who is Liz's parent?
+The `:-` symbol is read as "if".
+
+### 4. Important Terminology
+
+- **Clause:** A Prolog program consists of clauses. Each clause terminates with a full stop (`.`).
+- **Atom:** A constant value, like `tom` or `ann`.
+- **Variable:** A general object, like `X` or `Y`. Variable names start with an uppercase letter or an underscore.
+- **Unary Relation:** A property of a single object (e.g., `female(pam)`).
+- **Binary Relation:** A relationship between two objects (e.g., `parent(tom, bob)`).
+
+### 5. Family Tree Example
+
+Below is the full family tree from `lab01.pl` which we will be using.
+
+![Family Members](../diagrams/family-members.svg)
 
 ```prolog
-?- parent( X, liz).
+% Defining the parent relation
+parent(tom, bob).
+parent(tom, liz).
+parent(pam, bob).
+parent(bob, ann).
+parent(bob, pat).
+parent(pat, jim).
+
+% Adding info about the gender of each person
+female(pam).
+female(liz).
+female(pat).
+female(ann).
+
+male(tom).
+male(bob).
+male(jim).
+
+% Defining the mother relation using a rule
+mother(X,Y) :-
+    parent(X,Y),
+    female(X).
+
+% Defining the grandparent relation
+grandparent(X,Z) :-
+    parent(X,Y),
+    parent(Y,Z).
+
+% Defining the sister relation
+sister(Y,Z) :-
+    parent(X,Y),
+    parent(X, Z),
+    female(Y),
+    Y \= Z.
 ```
-
-Prolog will now tell us what is the value of X such that the above statement is true.
-So the answer is:
-X = tomThe question Who are Bob's children? can be communicated to Prolog as:
-
-```prolog
-?- parent( bob, X).
-```
-
-Our example program can be asked still more complicated questions like: Who
-is a grandparent of Jim?
-
-```prolog
-?- parent( Y, jim), parent( X, Y).
-```
-
-In a similar way we can ask: Who are Tom's grandchildren?
-
-```prolog
-?- parent(tom, X), parent( X, Y).
-```
-
-Yet another question could be: Do Ann and Pat have a common parent? This can be
-expressed again in two steps:
-(1) Who is a parent, X, of Ann?
-(2) Is X also a parent of Pat?
-The corresponding question to Prolog is:
-
-````prolog
-?- parent( X, ann), parent( X, pat).
-The answer is:
-
-```prolog
-X = bob
-````
-
-A Prolog program consists of clauses. Each clause terminates with a full stop.
-
-The arguments of relations can (among other things) be: concrete objects (atoms), or
-constants (such as tom and ann), or general objects such as X and Y (variables).
-
-The names of variables are strings that
-start with an upper-case letter or an underscore.
-
-The word 'goals' is used because Prolog interprets questions as goals that are to
-be satisfied. To 'satisfy a goal' means to logically deduce the goal from the
-program.
-
-## 1.2 Defining relations by rules
-
-first we need to identify the gender of the people with `female()` and `male()` relations, and we can ask more intresting questins about them.
-
-A **binary** relation like parent defines a relation between pairs of objects; on the other hand, **unary** relations can be used to declare simple yes/no
-properties of objects.
-
-As our next extension to the program, let us introduce the mother relation. We
-could define mother in a similar way as the parent relation;
-
-```prolog
-mother( pam, bob).
-mother( pat, jim).
-```
-
-imagine we had a large database of people. Then the mother relation can
-be defined much more elegantly by making use of the fact that it can be logically
-derived from the already known relations parent and female. This alternative way
-can be based on the following logical statement:
-For all X and Y,
-X is the mother of Y if
-X is a parent of Y, and X is female.
-
-In Prolog this is written as:
-
-```prolog
-mother(X, Y) :. parent( X, Y), female(X).
-```
-
-The Prolog symbol `:-` is read as `if`. This clause can also be read as:
-For all X and Y,
-if X is a parent of Y and X is female then
-X is the mother of Y.
-
-when
