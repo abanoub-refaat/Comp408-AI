@@ -13,29 +13,41 @@ This chapter introduces the fundamental concepts of Prolog, a language for symbo
 In Prolog, we can define relationships between objects as **facts**. For example, to state that Tom is a parent of Bob, we write:
 
 ```prolog
+
 parent(tom, bob).
+
 ```
 
-This establishes a `parent` relationship. We can then query the Prolog system to get information about this relationship.
+This establishes a `parent` relationship based on the family tree below.
+
+![Family Members](../diagrams/family-members.svg)
+
+We can then query the Prolog system to get information about this relationship.
 
 ### Asking Questions (Queries)
 
 - **Is Bob a parent of Pat?**
 
   ```prolog
+
   ?- parent(bob, pat).
+
   ```
 
 - **Who is Liz's parent?**
 
   ```prolog
+
   ?- parent(X, liz).
+
   ```
 
 - **Who are Bob's children?**
 
   ```prolog
+
   ?- parent(bob, X).
+
   ```
 
 Prolog answers these questions by trying to satisfy the **goals** provided. We can also ask more complex questions by combining goals:
@@ -43,13 +55,19 @@ Prolog answers these questions by trying to satisfy the **goals** provided. We c
 - **Who is a grandparent of Jim?**
 
   ```prolog
+
   ?- parent(Y, jim), parent(X, Y).
+
   ```
+
+  ![Grandparent Relation](../diagrams/grandparent-grandchild-relations.svg)
 
 - **Do Ann and Pat have a common parent?**
 
   ```prolog
+
   ?- parent(X, ann), parent(X, pat).
+
   ```
 
 ---
@@ -86,6 +104,8 @@ An ancestor can be either:
 
 We can define this in Prolog with two rules:
 
+![Grandparent Relation](../diagrams/ancestor-relation.svg)
+
 ```prolog
 % Rule 1: A direct ancestor is a parent
 ancestor(X, Z) :-
@@ -96,6 +116,8 @@ ancestor(X, Z) :-
     parent(X, Y),
     ancestor(Y, Z).
 ```
+
+![Grandparent Relation](../diagrams/recursive-ancestor-relation.svg)
 
 This recursive definition allows Prolog to find ancestors at any depth in a family tree.
 
