@@ -1,14 +1,14 @@
 # Chapter 1: Introduction to Prolog
 
-This chapter introduces the fundamental concepts of Prolog, a language for symbolic and non-numeric computation. We will explore how to define relationships using facts and rules.
+This chapter summary is based on "Prolog Programming for Artificial Intelligence" by Ivan Bratko, fourth edition.
+
+This chapter introduces the fundamental concepts of Prolog, a language for symbolic and non-numeric computation. We will explore how to define relationships using facts, rules, and recursion.
 
 **Associated Lab File:** [labs/lab01/lab01.pl](../labs/lab01/lab01.pl)
 
 ---
 
-## Key Concepts
-
-### 1. Defining Relations with Facts
+## 1.1 Defining Relations by Facts
 
 In Prolog, we can define relationships between objects as **facts**. For example, to state that Tom is a parent of Bob, we write:
 
@@ -18,7 +18,7 @@ parent(tom, bob).
 
 This establishes a `parent` relationship. We can then query the Prolog system to get information about this relationship.
 
-#### Asking Questions (Queries)
+### Asking Questions (Queries)
 
 - **Is Bob a parent of Pat?**
 
@@ -38,16 +38,9 @@ This establishes a `parent` relationship. We can then query the Prolog system to
   ?- parent(bob, X).
   ```
 
-Prolog answers these questions by trying to satisfy the **goals** provided.
-
-### 2. Complex Queries
-
-We can ask more complex questions by combining goals.
+Prolog answers these questions by trying to satisfy the **goals** provided. We can also ask more complex questions by combining goals:
 
 - **Who is a grandparent of Jim?**
-  This requires finding a person `Y` who is a parent of Jim, and then finding a person `X` who is a parent of `Y`.
-
-  ![Grandparent Relation](../diagrams/grandparent-grandchild-relations.svg)
 
   ```prolog
   ?- parent(Y, jim), parent(X, Y).
@@ -59,7 +52,9 @@ We can ask more complex questions by combining goals.
   ?- parent(X, ann), parent(X, pat).
   ```
 
-### 3. Defining Relations with Rules
+---
+
+## 1.2 Defining Relations by Rules
 
 We can also define new relationships using **rules**. A rule is a general statement about objects and their relationships.
 
@@ -78,53 +73,38 @@ mother(X, Y) :-
 
 The `:-` symbol is read as "if".
 
-### 4. Important Terminology
+---
 
-- **Clause:** A Prolog program consists of clauses. Each clause terminates with a full stop (`.`).
+## 1.3 Recursive Rules
+
+Some relations are **recursive**, meaning they can be defined in terms of themselves. The `ancestor` relation is a classic example.
+
+An ancestor can be either:
+
+1. A direct parent.
+2. An indirect ancestor (a parent of a parent, and so on).
+
+We can define this in Prolog with two rules:
+
+```prolog
+% Rule 1: A direct ancestor is a parent
+ancestor(X, Z) :-
+    parent(X, Z).
+
+% Rule 2: An indirect ancestor is a parent of another ancestor
+ancestor(X, Z) :-
+    parent(X, Y),
+    ancestor(Y, Z).
+```
+
+This recursive definition allows Prolog to find ancestors at any depth in a family tree.
+
+---
+
+### Important Terminology
+
+- **Clause:** A fact or a rule. Each clause terminates with a full stop (`.`).
 - **Atom:** A constant value, like `tom` or `ann`.
 - **Variable:** A general object, like `X` or `Y`. Variable names start with an uppercase letter or an underscore.
 - **Unary Relation:** A property of a single object (e.g., `female(pam)`).
 - **Binary Relation:** A relationship between two objects (e.g., `parent(tom, bob)`).
-
-### 5. Family Tree Example
-
-Below is the full family tree from `lab01.pl` which we will be using.
-
-![Family Members](../diagrams/family-members.svg)
-
-```prolog
-% Defining the parent relation
-parent(tom, bob).
-parent(tom, liz).
-parent(pam, bob).
-parent(bob, ann).
-parent(bob, pat).
-parent(pat, jim).
-
-% Adding info about the gender of each person
-female(pam).
-female(liz).
-female(pat).
-female(ann).
-
-male(tom).
-male(bob).
-male(jim).
-
-% Defining the mother relation using a rule
-mother(X,Y) :-
-    parent(X,Y),
-    female(X).
-
-% Defining the grandparent relation
-grandparent(X,Z) :-
-    parent(X,Y),
-    parent(Y,Z).
-
-% Defining the sister relation
-sister(Y,Z) :-
-    parent(X,Y),
-    parent(X, Z),
-    female(Y),
-    Y \= Z.
-```

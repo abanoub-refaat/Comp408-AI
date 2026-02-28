@@ -51,3 +51,12 @@ brother(Y,Z) :-
 % unary relation `haschild()`
 haschild(X) :-
     parent(X, Y).
+
+% defining the ancestor relation
+% we have a direct ancestor relation
+ancestor(X, Z) :-
+    parent(X, Z).
+% and the inderct ancestro rlation using recursive relations
+ancestor(X, Z) :-
+    parent(X, Y),
+    ancestor(Y, Z).
