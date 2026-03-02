@@ -1,3 +1,5 @@
+% for chapter explaination check materials/chapter02.md
+
 big(bear).              %clause 1
 big(elephant).          %clause 2
 small(cat).             %clause 3
