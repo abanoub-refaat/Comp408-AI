@@ -29,6 +29,7 @@ Variables are placeholders for values that are not yet known.
 
 - Represented by strings starting with an uppercase letter or `_` (e.g., `X`, `Result`, `_person`).
 - **Anonymous Variable (`_`):** Used when a variable's value is not important. Each `_` is a distinct variable.
+
   ```prolog
   % Is there a parent?
   ?- parent(_, _).
@@ -41,6 +42,7 @@ Structures are objects with several components, defined by a **functor** and its
 - **Syntax:** `functor(argument1, argument2, ...)`
 - **Example:** `date(2024, 7, 26)` has the functor `date` and arity 3.
 - Structures can be nested to represent complex data:
+
   ```prolog
   seg(point(1,1), point(2,3))
   ```
@@ -53,31 +55,34 @@ Matching is Prolog's way of comparing and unifying terms. It is triggered by the
 
 **Rules for Matching:**
 
-1.  **Constants:** Two constants match only if they are identical.
+1. **Constants:** Two constants match only if they are identical.
 
-    ```prolog
-    ?- anna = anna.
-    true.
+   ```prolog
+   ?- anna = anna.
+   true.
 
-    ?- anna = 'anna'.
-    true.
+   ?- anna = 'anna'.
+   true.
 
-    ?- anna = louis.
-    false.
-    ```
+   ?- anna = louis.
+   false.
+   ```
 
-2.  **Variables:** An uninstantiated variable matches any term and becomes instantiated to that term.
-    ```prolog
-    ?- X = anna.
-    X = anna.
-    ```
-3.  **Structures:** Two structures match if they have the same functor and arity, and all their corresponding arguments match.
-    ```prolog
-    ?- date(D, M, 2001) = date(D1, may, Y1).
-    D = D1,
-    M = may,
-    Y1 = 2001.
-    ```
+2. **Variables:** An uninstantiated variable matches any term and becomes instantiated to that term.
+
+   ```prolog
+   ?- X = anna.
+   X = anna.
+   ```
+
+3. **Structures:** Two structures match if they have the same functor and arity, and all their corresponding arguments match.
+
+   ```prolog
+   ?- date(D, M, 2001) = date(D1, may, Y1).
+   D = D1,
+   M = may,
+   Y1 = 2001.
+   ```
 
 ---
 

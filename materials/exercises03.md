@@ -59,10 +59,13 @@ last(Item, List) :-
 This approach "peels off" the head of the list until only one element remains.
 
 - **Base Case:** If the list has only one element, that element is the last one.
+
   ```prolog
   last(Item, [Item]).
   ```
+
 - **Recursive Step:** If the list has more than one element, the last element of the whole list is the last element of its tail.
+
   ```prolog
   last(Item, [_ | Tail]) :-
       last(Item, Tail).
@@ -208,10 +211,13 @@ add_last(X, List, NewList) :-
 This method traverses the list until it finds the end and then adds the new element.
 
 - **Base Case:** If the original list is empty, adding `X` to the end results in `[X]`.
+
   ```prolog
   add_last(X, [], [X]).
   ```
+
 - **Recursive Step:** Keep the head and recursively add `X` to the tail.
+
   ```prolog
   add_last(X, [H | T], [H | NewT]) :-
       add_last(X, T, NewT).
@@ -287,3 +293,180 @@ If you call `?- evenlength([a, b, c, d]).`:
 3. evenlength([c, d]) calls oddlength([d]).
 4. oddlength([d]) calls evenlength([]).
 5. evenlength([]) is true!
+
+---
+
+## Exercise 3.12: Understanding Operator Terms
+
+Assume the operator definitions:
+```prolog
+:- op(300, xfx, plays).
+:- op(200, xfy, and).
+```
+
+How are these terms understood by Prolog?
+
+**Term 1:** `jimmy plays football and squash`
+- **Structure:** `plays(jimmy, and(football, squash))`
+- **Principal Functor:** `plays/2`
+
+**Term 2:** `susan plays tennis and basketball and volleyball`
+- **Structure:** `plays(susan, and(tennis, and(basketball, volleyball)))`
+- **Principal Functor:** `plays/2`
+
+---
+
+## Exercise 3.13: Defining Natural Language Operators
+
+Suggest definitions for 'was', 'of', 'the' to write:
+`diana was the secretary of the department.`
+
+**Solution:**
+```prolog
+:- op(600, xfx, was).
+:- op(500, xfy, of).
+:- op(400, fx, the).
+```
+
+---
+
+## Exercise 3.14: Tracing Infix Operators
+
+Consider the program:
+```prolog
+t(0+1, 1+0).
+t(X+0+1, X+1+0).
+t(X+1+1, Z) :- t(X+1, X1), t(X1+1, Z).
+```
+If `+` is `yfx`:
+(a) `?- t(0+1, A).` -> `A = 1+0`
+(b) `?- t(0+1+1, B).` -> `B = 1+1+0`
+(c) `?- t(1+0+1+1+1, C).` -> `C = 1+1+1+1+0`
+(d) `?- t(D, 1+1+1+0).` -> `D = 0+1+1+1`
+
+---
+
+## Exercise 3.15: Defining List Relation Operators
+
+Define 'in', 'concatenating', 'and', 'gives', 'deleting', 'from' as operators.
+
+**Solution:**
+```prolog
+:- op(600, xfx, in).
+:- op(600, xfx, gives).
+:- op(500, xfy, concatenating).
+:- op(500, xfy, and).
+:- op(500, xfx, from).
+:- op(400, fx, deleting).
+
+% Redefined procedures:
+Item in List :- member(Item, List).
+concatenating L1 and L2 gives L3 :- conc(L1, L2, L3).
+deleting X from L gives L1 :- del(X, L, L1).
+```
+
+---
+
+## Exercise 3.16: Maximum of Two Numbers
+
+Define `max(X, Y, Max)`.
+
+**Solution:**
+```prolog
+max(X, Y, X) :- X >= Y.
+max(X, Y, Y) :- X < Y.
+```
+
+---
+
+## Exercise 3.17: Maximum of a List
+
+Define `maxlist(List, Max)`.
+
+**Solution:**
+```prolog
+maxlist([X], X).
+maxlist([X | Tail], Max) :-
+    maxlist(Tail, MaxTail),
+    max(X, MaxTail, Max).
+```
+
+---
+
+## Exercise 3.18: Sum of a List
+
+Define `sumlist(List, Sum)`.
+
+**Solution:**
+```prolog
+sumlist([], 0).
+sumlist([X | Tail], Sum) :-
+    sumlist(Tail, SumTail),
+    Sum is X + SumTail.
+```
+
+---
+
+## Exercise 3.19: Ordered List
+
+Define `ordered(List)`.
+
+**Solution:**
+```prolog
+ordered([]).
+ordered([_]).
+ordered([X, Y | Tail]) :-
+    X =< Y,
+    ordered([Y | Tail]).
+```
+
+---
+
+## Exercise 3.20: Subset Sum
+
+Define `subsum(Set, Sum, SubSet)`.
+
+**Solution:**
+```prolog
+subsum([], 0, []).
+subsum([X | Tail], Sum, [X | SubTail]) :-
+    Sum1 is Sum - X,
+    subsum(Tail, Sum1, SubTail).
+subsum([_ | Tail], Sum, SubSet) :-
+    subsum(Tail, Sum, SubSet).
+```
+
+---
+
+## Exercise 3.21: Range Generation
+
+Define `between(N1, N2, X)`.
+
+**Solution:**
+```prolog
+between(N, N, N).
+between(N1, N2, N1) :- N1 < N2.
+between(N1, N2, X) :-
+    N1 < N2,
+    Next is N1 + 1,
+    between(Next, N2, X).
+```
+
+---
+
+## Exercise 3.22: If-Then-Else Interpreter
+
+Define operators and a predicate for an `if-then-else` statement.
+
+**Solution:**
+```prolog
+:- op(900, fx, if).
+:- op(800, xfx, then).
+:- op(700, xfx, else).
+:- op(600, xfx, :=).
+
+if Val1 > Val2 then Var := Val3 else _Var := Val4 :-
+    Val1 > Val2, !, Var is Val3.
+if _Val1 > _Val2 then _Var := _Val3 else Var := Val4 :-
+    Var is Val4.
+
