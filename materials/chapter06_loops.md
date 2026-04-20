@@ -11,6 +11,7 @@ This chapter summary is based on "Logic Programming With Prolog". It explores ho
 Prolog does not have a native `for` loop, but similar effects are achieved using **recursion**.
 
 ### Basic Recursive Loop
+
 To execute a task $N$ times, we define a predicate that calls itself with a decremented value until a base case (terminating condition) is reached.
 
 ```prolog
@@ -23,10 +24,12 @@ loop(N) :-
 ```
 
 **Key Points:**
+
 - **Terminating Condition:** `loop(0).` ensures the recursion stops.
 - **Decrementing:** Use `M is N - 1` before the recursive call. `loop(N-1)` will NOT work because `N-1` is treated as a term, not a calculation.
 
 ### Summation and Accumulation
+
 Recursion can be used to calculate sums or other cumulative values by breaking the problem into a base case and a general recursive step.
 
 ```prolog
@@ -44,6 +47,7 @@ sumto(N, S) :-
 ## 6.2 Looping Until a Condition Is Satisfied
 
 ### 6.2.1 Using Recursion
+
 You can loop until a specific input or state is reached by passing the current state as a variable to the recursive call.
 
 ```prolog
@@ -55,9 +59,11 @@ loop(X) :-
 ```
 
 ### 6.2.2 Using the `repeat` Predicate
+
 The `repeat` predicate is a built-in tool that always succeeds. Its primary power comes from the fact that it **always succeeds on backtracking**, creating an infinite source of choice points.
 
 **How it works:**
+
 1. Evaluation proceeds left-to-right.
 2. If a goal to the right of `repeat` fails, Prolog backtracks to `repeat`.
 3. `repeat` succeeds again, and execution moves forward again.
@@ -70,6 +76,8 @@ get_answer(Ans) :-
     read(Ans),
     valid(Ans). % The loop "ends" when valid(Ans) succeeds.
 ```
+
+[Open repeat predicate interactive demo using this link (download it and open it in any browser)](interactive_materials/repeat_predicate_stepper.html)
 
 ---
 

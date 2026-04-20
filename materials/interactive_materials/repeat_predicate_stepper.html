@@ -1,0 +1,133 @@
+<style>
+.goal-row { display:flex; gap:8px; align-items:center; padding:10px 14px; border-radius:var(--border-radius-md); border:0.5px solid var(--color-border-tertiary); background:var(--color-background-secondary); font-family:var(--font-mono); font-size:13px; color:var(--color-text-secondary); transition:all 0.25s; }
+.goal-row.active { background:#E6F1FB; border-color:#185FA5; color:#042C53; }
+.goal-row.success { background:#EAF3DE; border-color:#3B6D11; color:#173404; }
+.goal-row.fail { background:#FCEBEB; border-color:#A32D2D; color:#501313; }
+.goal-row.dim { opacity:0.38; }
+.badge { font-size:11px; padding:2px 8px; border-radius:20px; font-family:var(--font-sans); font-weight:500; margin-left:auto; white-space:nowrap; }
+.badge-active { background:#B5D4F4; color:#0C447C; }
+.badge-success { background:#C0DD97; color:#27500A; }
+.badge-fail { background:#F7C1C1; color:#791F1F; }
+.badge-bt { background:#FAC775; color:#633806; }
+.badge-entry { background:#CECBF6; color:#3C3489; }
+.note-box { font-size:13px; color:var(--color-text-secondary); background:var(--color-background-secondary); border-left:3px solid var(--color-border-secondary); border-radius:0; padding:10px 14px; margin-top:12px; line-height:1.6; }
+.iter-pill { display:inline-block; font-size:11px; font-weight:500; font-family:var(--font-sans); padding:2px 10px; border-radius:20px; background:var(--color-background-secondary); border:0.5px solid var(--color-border-secondary); color:var(--color-text-secondary); margin-bottom:10px; }
+.btn-row { display:flex; gap:8px; margin-top:16px; }
+</style>
+
+<h2 class="sr-only">Interactive stepper showing how the repeat predicate executes in Prolog</h2>
+
+<div style="margin-bottom:12px;">
+  <div style="font-size:12px; color:var(--color-text-secondary); margin-bottom:8px; font-family:var(--font-mono);">get_answer(Ans) :-</div>
+  <div id="goals" style="display:flex; flex-direction:column; gap:6px;"></div>
+</div>
+
+<div id="iter-label" class="iter-pill"></div>
+
+<div id="note" class="note-box"></div>
+
+<div class="btn-row">
+  <button id="btn-prev" onclick="move(-1)">← Back</button>
+  <button id="btn-next" onclick="move(1)">Next →</button>
+  <button onclick="reset()" style="margin-left:auto;">Reset</button>
+</div>
+
+<script>
+const GOALS = [
+  { label: 'repeat', indent: 4 },
+  { label: "write('Enter yes or no: ')", indent: 4 },
+  { label: 'read(Ans)', indent: 4 },
+  { label: 'valid(Ans)', indent: 4 },
+];
+
+const STEPS = [
+  {
+    title: 'Step 1 — call repeat',
+    iter: 'Iteration 1',
+    states: ['active','dim','dim','dim'],
+    badges: ['active',null,null,null],
+    note: '<strong>repeat</strong> is called. It succeeds immediately (it always does). A <em>choice point</em> is left here — Prolog notes "if anything fails later, I can come back to this point and repeat will succeed again."',
+  },
+  {
+    title: 'Step 2 — write(…)',
+    iter: 'Iteration 1',
+    states: ['success','active','dim','dim'],
+    badges: [null,'active',null,null],
+    note: '<strong>write(\'Enter yes or no: \')</strong> prints the prompt to the screen and succeeds. Execution moves forward.',
+  },
+  {
+    title: 'Step 3 — read(Ans)',
+    iter: 'Iteration 1',
+    states: ['success','success','active','dim'],
+    badges: [null,null,'active',null],
+    note: '<strong>read(Ans)</strong> waits for user input and binds Ans to whatever is typed. Say the user types <code>maybe.</code> — Ans is now bound to the atom <code>maybe</code>. Succeeds and moves forward.',
+  },
+  {
+    title: 'Step 4 — valid(Ans) fails',
+    iter: 'Iteration 1',
+    states: ['success','success','success','fail'],
+    badges: [null,null,null,'fail'],
+    note: '<strong>valid(maybe)</strong> fails — there is no clause <code>valid(maybe)</code>. Prolog must now backtrack. <em>Ans is unbound again.</em> read, write, and valid are all non-resatisfiable — they cannot succeed again on backtracking. So Prolog keeps backtracking leftward…',
+  },
+  {
+    title: 'Step 5 — backtrack to repeat',
+    iter: 'Between iterations',
+    states: ['entry','dim','dim','dim'],
+    badges: ['entry',null,null,null],
+    note: '<strong>Prolog reaches the repeat choice point.</strong> repeat re-succeeds (this is its whole purpose). Execution direction flips back to left-to-right. Note: write(…) before repeat would NOT be re-executed — goals before repeat are already done and gone.',
+  },
+  {
+    title: 'Step 6 — write(…) again',
+    iter: 'Iteration 2',
+    states: ['success','active','dim','dim'],
+    badges: [null,'active',null,null],
+    note: 'write prints the prompt <em>again</em>. This is why the prompt re-appears each time — it sits after repeat in the clause body, so it runs on every iteration.',
+  },
+  {
+    title: 'Step 7 — read(Ans) again',
+    iter: 'Iteration 2',
+    states: ['success','success','active','dim'],
+    badges: [null,null,'active',null],
+    note: '<strong>read(Ans)</strong> waits again. This time the user types <code>yes.</code> — Ans is bound to <code>yes</code>.',
+  },
+  {
+    title: 'Step 8 — valid(Ans) succeeds',
+    iter: 'Iteration 2',
+    states: ['success','success','success','success'],
+    badges: [null,null,null,'success'],
+    note: '<strong>valid(yes)</strong> succeeds — there is a clause <code>valid(yes)</code>. No more backtracking needed. The entire goal <code>get_answer(yes)</code> succeeds and Ans = yes is returned to the caller.',
+  },
+];
+
+let cur = 0;
+
+function render() {
+  const s = STEPS[cur];
+  const goalDiv = document.getElementById('goals');
+  goalDiv.innerHTML = '';
+  GOALS.forEach((g, i) => {
+    const state = s.states[i];
+    const badge = s.badges[i];
+    const div = document.createElement('div');
+    div.className = 'goal-row ' + (state || '');
+    div.innerHTML = `<span style="display:inline-block;width:${g.indent*6}px"></span><span>${g.label}</span>`;
+    if (badge) {
+      const badgeEl = document.createElement('span');
+      badgeEl.className = 'badge badge-' + badge;
+      const labels = { active:'executing', success:'succeeded', fail:'FAILED', entry:'re-entry', bt:'backtracking' };
+      badgeEl.textContent = labels[badge] || badge;
+      div.appendChild(badgeEl);
+    }
+    goalDiv.appendChild(div);
+  });
+  document.getElementById('iter-label').textContent = s.iter;
+  document.getElementById('note').innerHTML = s.note;
+  document.getElementById('btn-prev').disabled = cur === 0;
+  document.getElementById('btn-next').disabled = cur === STEPS.length - 1;
+  document.getElementById('btn-next').textContent = cur === STEPS.length - 1 ? 'Done' : 'Next →';
+}
+
+function move(d) { cur = Math.max(0, Math.min(STEPS.length-1, cur+d)); render(); }
+function reset() { cur = 0; render(); }
+render();
+</script>
