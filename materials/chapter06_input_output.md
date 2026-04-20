@@ -38,6 +38,7 @@ count(A, [_ | L], N) :-
 ```
 
 ### Application: Cryptarithmetic Puzzles
+
 The `nonvar/1` predicate is useful in solving puzzles like `DONALD + GERALD = ROBERT`. It allows for an efficient digit-by-digit summation by checking if a digit is already instantiated before trying to assign a new one.
 
 ```prolog
